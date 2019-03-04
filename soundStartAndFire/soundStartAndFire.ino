@@ -1,5 +1,14 @@
 #include <TimedAction.h>
 
+#include <ros.h>
+#include <std_msgs/String.h>
+
+ros::NodeHandle nh;
+
+std_msgs::String str_msg;
+ros::Publisher chatter("chatter", &str_msg);
+char hello[5] = "sound";
+
 boolean clipping = 0;
 boolean doneWithSound = false;
 
@@ -37,8 +46,8 @@ void checkFlames() {
 }
 
 void setup(){
-
-  Serial.begin(115200);
+  nh.initNode();
+  nh.advertise(chatter);
 
   //pinMode(CLIPLED, OUTPUT);//clipping indicator pin
   //pinMode(CORRLED, OUTPUT);//led indicator pin
@@ -82,7 +91,6 @@ void setup(){
       //Serial.print("");
       //Serial.println(correct);
       if (correct > (wrong * 3)) {
-        Serial.println("sound");
         doneWithSound = true;
       } else {
         //digitalWrite(CORRLED, 0);
@@ -110,6 +118,9 @@ void setup(){
   pinMode(AIN2, OUTPUT);
 
   digitalWrite(bluePin, HIGH);
+  str_msg.data = hello;
+  chatter.publish( &str_msg );
+  nh.spinOnce();
   /*
   digitalWrite(AIN1, HIGH);
   digitalWrite(AIN2, LOW);
