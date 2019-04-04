@@ -1,5 +1,3 @@
-#include <TimedAction.h>
-
 #include <ros.h>
 #include <std_msgs/String.h>
 
@@ -30,27 +28,25 @@ const int redPin = 6;
 
 const int FLAME = A3;
 
-TimedAction flameCheckThread = TimedAction(50, checkFlames);
-
 const int FLAME_INROOM = 800;
 const int FLAME_INFRONT = 40;
 
+const int AIN1 = 5;
+const int AIN2 = 6;
 
 void checkFlames() {
   int flame_detector = analogRead(FLAME);
   flame_detector = analogRead(FLAME);
   //Serial.println(flame_detector);
   if(flame_detector <= FLAME_INFRONT){
-     analogWrite(12, 255); //LED On
+     analogWrite(13, 255); //LED On
   }
 }
 
 void setup(){
+  Serial.begin(19200);
   nh.initNode();
   nh.advertise(chatter);
-
-  //pinMode(CLIPLED, OUTPUT);//clipping indicator pin
-  //pinMode(CORRLED, OUTPUT);//led indicator pin
 
   cli();//diable interrupts
 
@@ -69,17 +65,16 @@ void setup(){
   ADCSRA |= (1 << ADSC); //start ADC measurements
 
   sei();//enable interrupts
-
+  Serial.println("here");
   do {
     if (clipping){//if currently clipping
       PORTB &= B11011111;//turn off clippng indicator led
       clipping = 0;
     }
-
     frequency = 38462/period;//timer rate/period
     //print results
-    //Serial.print(frequency);
-    //Serial.println(" hz");
+    Serial.print(frequency);
+    Serial.println(" hz");
 
     if (3306 < frequency && 4294 > frequency) {
       correct++;
@@ -90,7 +85,7 @@ void setup(){
       //Serial.print(wrong);
       //Serial.print("");
       //Serial.println(correct);
-      if (correct > (wrong * 3)) {
+      if (correct>wrong*3) {
         doneWithSound = true;
       } else {
         //digitalWrite(CORRLED, 0);
@@ -117,8 +112,8 @@ void setup(){
   pinMode(AIN1, OUTPUT);
   pinMode(AIN2, OUTPUT);
 
-  digitalWrite(bluePin, HIGH);
   str_msg.data = hello;
+  Serial.print("printing");
   chatter.publish( &str_msg );
   nh.spinOnce();
   /*
@@ -154,5 +149,6 @@ ISR(ADC_vect) {//when new ADC value ready
 }
 
 void loop() {
-  flamePrintThread.check();
+  checkFlames();
+  //flamePrintThread.check();
 }
