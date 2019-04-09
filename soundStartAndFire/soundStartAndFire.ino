@@ -4,7 +4,10 @@
 ros::NodeHandle nh;
 
 std_msgs::String str_msg;
-ros::Publisher chatter("chatter", &str_msg);
+std_msgs::Float64 flame_reading;
+ros::Publisher sound("sound", &str_msg);
+ros::Publisher flame("flame", &flame_reading);
+ros::Subscriber<std_msgs::Empty> sub("toggle_extinguisher", &messageCb );
 char hello[5] = "sound";
 
 boolean clipping = 0;
@@ -34,20 +37,29 @@ const int FLAME_INFRONT = 40;
 const int AIN1 = 5;
 const int AIN2 = 6;
 
+void messageCb(const std_msgs::Empty& toggle_msg){
+  digitalWrite(6, HIGH-digitalRead(6));   // blink the led
+}
+
 void checkFlames() {
   int flame_detector = analogRead(FLAME);
   flame_detector = analogRead(FLAME);
   //Serial.println(flame_detector);
   if(flame_detector <= FLAME_INFRONT){
      analogWrite(13, 255); //LED On
+     flame_reading = flame_detector;
+     flame.publish(&flame_reading)
+
   }
 }
 
 void setup(){
   Serial.begin(19200);
+  pinMode(6, OUTPUT);
   nh.initNode();
-  nh.advertise(chatter);
-
+  nh.advertise(sound);
+  nh.advertise(flame);
+  nh.subscribe(sub);
   cli();//diable interrupts
 
   //set up continuous sampling of analog pin 0
@@ -114,7 +126,7 @@ void setup(){
 
   str_msg.data = hello;
   Serial.print("printing");
-  chatter.publish( &str_msg );
+  sound.publish( &str_msg );
   nh.spinOnce();
   /*
   digitalWrite(AIN1, HIGH);
@@ -151,4 +163,5 @@ ISR(ADC_vect) {//when new ADC value ready
 void loop() {
   checkFlames();
   //flamePrintThread.check();
+  nh.spinOnce();;
 }
