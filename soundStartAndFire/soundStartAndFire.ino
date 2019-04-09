@@ -1,9 +1,15 @@
 #include <ros.h>
-#include <std_msgs/String.h>
+#include <std_msgs/Int32.h>
+#include <std_msgs/Empty.h>
+
 
 ros::NodeHandle nh;
 
-std_msgs::Integer flame_reading;
+void messageCb(const std_msgs::Empty& toggle_msg){
+  digitalWrite(6, HIGH-digitalRead(6));   // blink the led
+}
+
+std_msgs::Int32 flame_reading;
 ros::Publisher arduinoInfo("/arduinoInfo", &flame_reading);
 ros::Subscriber<std_msgs::Empty> sub("toggle_extinguisher", &messageCb );
 
@@ -34,18 +40,15 @@ const int FLAME_INFRONT = 40;
 const int AIN1 = 5;
 const int AIN2 = 6;
 
-void messageCb(const std_msgs::Empty& toggle_msg){
-  digitalWrite(6, HIGH-digitalRead(6));   // blink the led
-}
+
 
 void checkFlames() {
   int flame_detector = analogRead(FLAME);
-  flame_detector = analogRead(FLAME);
   //Serial.println(flame_detector);
   if(flame_detector <= FLAME_INFRONT){
      analogWrite(13, 255); //LED On
-     flame_reading = flame_detector;
-     flame.publish(&flame_reading)
+     flame_reading.data = flame_detector;
+     arduinoInfo.publish(&flame_reading);
 
   }
 }
@@ -120,12 +123,11 @@ void setup(){
   pinMode(AIN1, OUTPUT);
   pinMode(AIN2, OUTPUT);
 
-  str_msg.data = hello;
   Serial.print("printing");
-  flame_reading=1000;
+  flame_reading.data = 1000;
   arduinoInfo.publish( &flame_reading );
   nh.spinOnce();
-  flame_reading=0;
+  flame_reading.data = 0;
   /*
   digitalWrite(AIN1, HIGH);
   digitalWrite(AIN2, LOW);
