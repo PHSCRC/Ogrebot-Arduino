@@ -3,12 +3,9 @@
 
 ros::NodeHandle nh;
 
-std_msgs::String str_msg;
-std_msgs::Float64 flame_reading;
-ros::Publisher sound("sound", &str_msg);
-ros::Publisher flame("flame", &flame_reading);
+std_msgs::Integer flame_reading;
+ros::Publisher arduinoInfo("/arduinoInfo", &flame_reading);
 ros::Subscriber<std_msgs::Empty> sub("toggle_extinguisher", &messageCb );
-char hello[5] = "sound";
 
 boolean clipping = 0;
 boolean doneWithSound = false;
@@ -57,8 +54,7 @@ void setup(){
   Serial.begin(19200);
   pinMode(6, OUTPUT);
   nh.initNode();
-  nh.advertise(sound);
-  nh.advertise(flame);
+  nh.advertise(arduinoInfo);
   nh.subscribe(sub);
   cli();//diable interrupts
 
@@ -126,8 +122,10 @@ void setup(){
 
   str_msg.data = hello;
   Serial.print("printing");
-  sound.publish( &str_msg );
+  flame_reading=1000;
+  arduinoInfo.publish( &flame_reading );
   nh.spinOnce();
+  flame_reading=0;
   /*
   digitalWrite(AIN1, HIGH);
   digitalWrite(AIN2, LOW);
