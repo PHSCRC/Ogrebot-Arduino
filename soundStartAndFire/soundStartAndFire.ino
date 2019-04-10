@@ -1,17 +1,3 @@
-#include <ros.h>
-#include <std_msgs/Int32.h>
-#include <std_msgs/Empty.h>
-
-
-ros::NodeHandle nh;
-
-void messageCb(const std_msgs::Empty& toggle_msg){
-  digitalWrite(6, HIGH-digitalRead(6));   // blink the led
-}
-
-std_msgs::Int32 flame_reading;
-ros::Publisher arduinoInfo("/arduinoInfo", &flame_reading);
-ros::Subscriber<std_msgs::Empty> sub("toggle_extinguisher", &messageCb );
 
 boolean clipping = 0;
 boolean doneWithSound = false;
@@ -41,26 +27,19 @@ const int AIN1 = 5;
 const int AIN2 = 6;
 
 
-
 void checkFlames() {
   int flame_detector = analogRead(FLAME);
   //Serial.println(flame_detector);
   if(flame_detector <= FLAME_INFRONT){
      analogWrite(13, 255); //LED On
-     flame_reading.data = flame_detector;
-     arduinoInfo.publish(&flame_reading);
+     Serial.println(flame_detector)
 
   }
 }
 
 void setup(){
-  Serial.begin(19200);
-  pinMode(6, OUTPUT);
-  nh.initNode();
-  nh.advertise(arduinoInfo);
-  nh.subscribe(sub);
-  cli();//diable interrupts
-
+  Serial.begin(9600);
+  cli()
   //set up continuous sampling of analog pin 0
 
   //clear ADCSRA and ADCSRB registers
@@ -123,11 +102,6 @@ void setup(){
   pinMode(AIN1, OUTPUT);
   pinMode(AIN2, OUTPUT);
 
-  Serial.print("printing");
-  flame_reading.data = 1000;
-  arduinoInfo.publish( &flame_reading );
-  nh.spinOnce();
-  flame_reading.data = 0;
   /*
   digitalWrite(AIN1, HIGH);
   digitalWrite(AIN2, LOW);
@@ -162,6 +136,4 @@ ISR(ADC_vect) {//when new ADC value ready
 
 void loop() {
   checkFlames();
-  //flamePrintThread.check();
-  nh.spinOnce();;
 }
