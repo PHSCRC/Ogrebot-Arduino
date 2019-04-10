@@ -32,14 +32,14 @@ void checkFlames() {
   //Serial.println(flame_detector);
   if(flame_detector <= FLAME_INFRONT){
      analogWrite(13, 255); //LED On
-     Serial.println(flame_detector)
+     Serial.println(flame_detector);
 
   }
 }
 
 void setup(){
   Serial.begin(9600);
-  cli()
+  cli();
   //set up continuous sampling of analog pin 0
 
   //clear ADCSRA and ADCSRB registers
@@ -62,9 +62,7 @@ void setup(){
       clipping = 0;
     }
     frequency = 38462/period;//timer rate/period
-    //print results
-    Serial.print(frequency);
-    Serial.println(" hz");
+
 
     if (3306 < frequency && 4294 > frequency) {
       correct++;
