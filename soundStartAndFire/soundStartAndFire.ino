@@ -29,9 +29,10 @@ const int AIN2 = 6;
 
 void checkFlames() {
   int flame_detector = analogRead(FLAME);
+ // Serial.println(flame_detector);
   //Serial.println(flame_detector);
-  if(flame_detector <= FLAME_INFRONT){
-     analogWrite(13, 255); //LED On
+  if(flame_detector >= FLAME_INROOM){
+     digitalWrite(3, HIGH);
      Serial.println(flame_detector);
 
   }
@@ -39,6 +40,8 @@ void checkFlames() {
 
 void setup(){
   Serial.begin(9600);
+  pinMode(3, OUTPUT);
+  pinMode(5, OUTPUT);
   cli();
   //set up continuous sampling of analog pin 0
 
@@ -75,6 +78,10 @@ void setup(){
       //Serial.println(correct);
       if (correct>wrong*3) {
         doneWithSound = true;
+        digitalWrite(5, HIGH);
+        for (int i=0; i<5; i++){
+          Serial.println("sound");
+        }
       } else {
         //digitalWrite(CORRLED, 0);
       }
@@ -134,4 +141,5 @@ ISR(ADC_vect) {//when new ADC value ready
 
 void loop() {
   checkFlames();
+  delay(.01);
 }
